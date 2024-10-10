@@ -39,3 +39,4 @@ Subir os serviços:
 docker compose up
 ```
 
+**Acesse https://minio.docker.local/**
