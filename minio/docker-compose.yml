@@ -11,7 +11,7 @@ services:
       - minio-data:/data
     command: server /data --console-address ":9001"
     networks:
-      - s3_network
+      - minio_network
 
   nginx:
     image: nginx:latest
@@ -19,7 +19,7 @@ services:
     volumes:
       - ./html:/usr/share/nginx/html:ro
     networks:
-      - s3_network
+      - minio_network
 
   haproxy:
     image: haproxy:latest
@@ -34,10 +34,10 @@ services:
       - nginx
       - minio
     networks:
-      - s3_network
+      - minio_network
 
 networks:
-  s3_network:
+  minio_network:
     driver: bridge
 
 volumes:
