@@ -1,6 +1,6 @@
 # Serviços docker para subir em ambiente de desenvolvimento
 
-Uma série de serviços úteis para ambientes de testes e desenvolvimento com docker
+Uma série de serviços úteis para ambientes de testes e desenvolvimento com docker. Testado no docker Windows com WSL Ubuntu.
 
 ## Certificados
 
@@ -35,6 +35,7 @@ Se estiver no Windows, executar no powershell, como administrador, o script para
 Subir os serviços:
 
 ```bash
+#cd minio
 docker compose up
 ```
 
