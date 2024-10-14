@@ -1,0 +1,96 @@
+version: '3.7'
+
+services:
+  spark-master:
+    image: apache/spark:3.5.3
+    container_name: spark-master
+    environment:
+      - SPARK_DAEMON_MEMORY=1g
+      - SPARK_MASTER_HOST=spark.docker.local
+      - SPARK_PUBLIC_DNS=spark.docker.local
+      - SPARK_MASTER_WEBUI_PORT=8081
+      - SPARK_NO_DAEMONIZE=true
+    command: >
+      /opt/spark/sbin/start-master.sh
+    networks:
+      spark_network:
+        aliases:
+          - spark.docker.local
+
+  spark-worker1:
+    image: apache/spark:3.5.3
+    container_name: spark-worker1
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=3G
+      - SPARK_WORKER_OPTS=
+      - SPARK_WORKER_HOST=worker1.spark.docker.local
+      - SPARK_PUBLIC_DNS=worker1.spark.docker.local
+      - SPARK_MASTER_WEBUI_PORT=8081
+      - SPARK_NO_DAEMONIZE=true      
+    command: >
+      /opt/spark/sbin/start-worker.sh spark://spark.docker.local:7077
+    networks:
+      spark_network:
+        aliases:
+          - worker1.spark.docker.local
+
+  spark-worker2:
+    image: apache/spark:3.5.3
+    container_name: spark-worker2
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=3G
+      - SPARK_PUBLIC_DNS=worker2.spark.docker.local
+      - SPARK_MASTER_WEBUI_PORT=8081
+      - SPARK_NO_DAEMONIZE=true
+    command: >
+      /opt/spark/sbin/start-worker.sh spark://spark.docker.local:7077
+    networks:
+      spark_network:
+        aliases:
+          - worker2.spark.docker.local
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - spark_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    networks:
+      - spark_network
+
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8081:8081"
+      - "7077:7077"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./certs/pem:/usr/local/etc/haproxy/certs:ro
+    depends_on:
+      - nginx
+      - minio
+    networks:
+      - spark_network
+
+networks:
+  spark_network:
+    driver: bridge
+
+volumes:
+  minio-data:
