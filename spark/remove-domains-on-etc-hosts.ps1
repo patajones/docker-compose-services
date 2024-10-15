@@ -1,5 +1,4 @@
-# Define o IP e o caminho para o arquivo hosts
-$ip = "127.0.0.1"
+# Define o caminho para o arquivo hosts
 $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
 
 # Função para remover um domínio do arquivo hosts
@@ -9,9 +8,9 @@ function Remove-DomainFromHosts {
     )
     
     # Verifica se o domínio está presente no arquivo hosts
-    if (Get-Content $hostsPath | Select-String "$ip\s+$domain") {
+    if (Get-Content $hostsPath | Select-String "^\s*\d{1,3}(\.\d{1,3}){3}\s+$domain") {
         # Filtra as linhas que não contêm o domínio e reescreve o arquivo hosts
-        (Get-Content $hostsPath) | Where-Object { $_ -notmatch "$ip\s+$domain" } | Set-Content $hostsPath
+        (Get-Content $hostsPath) | Where-Object { $_ -notmatch "^\s*\d{1,3}(\.\d{1,3}){3}\s+$domain" } | Set-Content $hostsPath
         Write-Host "Domínio $domain removido do arquivo hosts."
     } else {
         Write-Host "O domínio $domain não está presente no arquivo hosts."

@@ -3,7 +3,8 @@
 
 set -e
 
-IP="127.0.0.1"
+# Obtém o IP da interface eth0 usando ifconfig e awk
+IP=$(ifconfig eth0 | grep 'inet ' | awk '{print $2}')
 
 add_domain_to_hosts() {
     local DOMAIN=$1

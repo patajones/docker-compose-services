@@ -1,1 +1,10 @@
-**/**/certs
+certs
+target
+.metals
+.bloop
+metals.sbt
+.bsp
+.scala-build/ide-envs.json
+.vscode
+**/**/project/build.properties
+.scala-build

@@ -10,10 +10,17 @@ services:
       - SPARK_PUBLIC_DNS=spark.docker.local
       - SPARK_MASTER_WEBUI_PORT=8081
       - SPARK_NO_DAEMONIZE=true
+      - SPARK_LOCAL_IP=192.168.17.10
+      - SPARK_WORKER_OPTS=-Dlog4j.configuration=/opt/spark/conf/log4j.properties
     command: >
       /opt/spark/sbin/start-master.sh
+    volumes:
+      - ./log4j.properties:/opt/spark/conf/log4j.properties
+    ports:
+      - "7077:7077"    
     networks:
       spark_network:
+        ipv4_address: 192.168.17.10
         aliases:
           - spark.docker.local
 
@@ -21,17 +28,22 @@ services:
     image: apache/spark:3.5.3
     container_name: spark-worker1
     environment:
-      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_CORES=4
       - SPARK_WORKER_MEMORY=3G
       - SPARK_WORKER_OPTS=
       - SPARK_WORKER_HOST=worker1.spark.docker.local
       - SPARK_PUBLIC_DNS=worker1.spark.docker.local
       - SPARK_MASTER_WEBUI_PORT=8081
-      - SPARK_NO_DAEMONIZE=true      
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_LOCAL_IP=192.168.17.11
+      - SPARK_WORKER_OPTS=-Dlog4j.configuration=/opt/spark/conf/log4j.properties      
     command: >
       /opt/spark/sbin/start-worker.sh spark://spark.docker.local:7077
+    volumes:
+      - ./log4j.properties:/opt/spark/conf/log4j.properties
     networks:
       spark_network:
+        ipv4_address: 192.168.17.11
         aliases:
           - worker1.spark.docker.local
 
@@ -39,15 +51,20 @@ services:
     image: apache/spark:3.5.3
     container_name: spark-worker2
     environment:
-      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_CORES=4
       - SPARK_WORKER_MEMORY=3G
       - SPARK_PUBLIC_DNS=worker2.spark.docker.local
       - SPARK_MASTER_WEBUI_PORT=8081
       - SPARK_NO_DAEMONIZE=true
+      - SPARK_LOCAL_IP=192.168.17.12
+      - SPARK_WORKER_OPTS=-Dlog4j.configuration=/opt/spark/conf/log4j.properties
     command: >
       /opt/spark/sbin/start-worker.sh spark://spark.docker.local:7077
+    volumes:
+      - ./log4j.properties:/opt/spark/conf/log4j.properties    
     networks:
       spark_network:
+        ipv4_address: 192.168.17.12
         aliases:
           - worker2.spark.docker.local
 
@@ -77,8 +94,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8081:8081"
-      - "7077:7077"
+      - "8081:8081"      
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./certs/pem:/usr/local/etc/haproxy/certs:ro
@@ -91,6 +107,9 @@ services:
 networks:
   spark_network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.17.0/24
 
 volumes:
   minio-data:

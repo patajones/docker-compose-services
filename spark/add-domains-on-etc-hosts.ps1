@@ -1,5 +1,8 @@
-# Define o IP e o caminho para o arquivo hosts
-$ip = "127.0.0.1"
+
+# Obtém o IP da interface "vEthernet (WSL (Hyper-V firewall))"
+$adapterName = "vEthernet (WSL (Hyper-V firewall))"
+$ip = (Get-NetIPAddress -InterfaceAlias $adapterName -AddressFamily IPv4).IPAddress
+
 $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
 
 # Função para adicionar domínio ao arquivo hosts
